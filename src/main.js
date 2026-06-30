@@ -1,17 +1,22 @@
-// main.js - Sistema de Gestión de Reservas
 import './style.css'; 
 
-// En lugar de const DB = { ... }
-async function cargarEscorts() {
-  const respuesta = await fetch('/api/obtener-escorts.php');
-  const datos = await respuesta.json();
-  return datos;
-}
-
+// Estado global alimentado por el servidor
+let DB = { escorts: [] }; 
 const app = document.querySelector('#app');
 
-// --- NAVEGACIÓN Y VISTAS ---
+// --- CARGA DE DATOS ---
+async function cargarDatos() {
+  try {
+    const respuesta = await fetch('/api/obtener-escorts.php');
+    if (!respuesta.ok) throw new Error("No se pudo conectar con la BD");
+    DB = await respuesta.json();
+    mostrarLogin(); // Una vez cargados los datos, mostramos el login
+  } catch (error) {
+    app.innerHTML = `<div class="contenedor"><p>Error: ${error.message}</p></div>`;
+  }
+}
 
+// --- VISTAS ---
 function mostrarLogin() {
   app.innerHTML = `
     <div class="contenedor">
@@ -72,16 +77,12 @@ function mostrarCalendario(escortId, diaIndex = 0) {
   `;
 }
 
-// --- DELEGACIÓN DE EVENTOS (Aquí reside la magia) ---
+// --- DELEGACIÓN DE EVENTOS (Unificada para evitar errores) ---
 
 app.addEventListener('click', (e) => {
-  // Botón Volver
   if (e.target.classList.contains('btn-volver')) mostrarCatalogo();
-  
-  // Botón Reservar
   if (e.target.classList.contains('btn-reservar')) mostrarCalendario(e.target.dataset.id);
 
-  // Botón Slot (Hora)
   if (e.target.classList.contains('btn-slot')) {
     const { id, fecha } = e.target.dataset;
     app.innerHTML = `
@@ -97,26 +98,28 @@ app.addEventListener('click', (e) => {
     `;
   }
 
-  // Botón Confirmar Final
   if (e.target.id === 'btn-finalizar') {
     const nombre = document.getElementById('nombreCliente').value;
     if (!nombre) return alert("Introduce tu nombre");
-    const { id, fecha } = e.target.dataset;
-    DB.escorts.find(m => m.id === id).ocupadas.push(fecha);
     alert(`Cita confirmada para ${nombre}.`);
     mostrarCatalogo();
   }
 });
 
-// Evento cambio select
 app.addEventListener('change', (e) => {
   if (e.target.id === 'select-dia') mostrarCalendario(e.target.dataset.id, e.target.value);
 });
 
-// Listener Login
 app.addEventListener('submit', (e) => {
   e.preventDefault();
-  if (document.getElementById('username')?.value === 'admin' && document.getElementById('password')?.value === '123') mostrarCatalogo();
+  if (e.target.id === 'login-form') {
+    if (document.getElementById('username')?.value === 'admin' && document.getElementById('password')?.value === '123') {
+      mostrarCatalogo();
+    } else {
+      alert("Credenciales incorrectas");
+    }
+  }
 });
 
-mostrarLogin();
+// Arrancar el sistema
+cargarDatos();
