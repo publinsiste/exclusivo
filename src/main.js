@@ -1,0 +1,123 @@
+// main.js - Sistema de Gestión de Reservas
+import './style.css'; 
+
+const DB = {
+  escorts: [
+    { id: 'e1', nombre: 'Valeria', ocupadas: ['2026-06-30T18:00'] },
+    { id: 'e2', nombre: 'Sophia', ocupadas: [] },
+    { id: 'e3', nombre: 'Elena', ocupadas: [] }
+  ]
+};
+
+const app = document.querySelector('#app');
+
+// --- NAVEGACIÓN Y VISTAS ---
+
+function mostrarLogin() {
+  app.innerHTML = `
+    <div class="contenedor">
+      <div class="tarjeta">
+        <h1 class="titulo">Acceso Exclusivo</h1>
+        <form id="login-form">
+          <div class="grupo-input"><input type="text" id="username" placeholder="Usuario" required /></div>
+          <div class="grupo-input"><input type="password" id="password" placeholder="Contraseña" required /></div>
+          <button type="submit" class="btn-gold">Entrar</button>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function mostrarCatalogo() {
+  app.innerHTML = `
+    <div class="grid-catalogo">
+      ${DB.escorts.map(m => `
+        <div class="ficha-modelo">
+          <div style="font-size: 3rem; color: #333;">👤</div>
+          <h2 class="titulo">${m.nombre}</h2>
+          <button class="btn-gold btn-reservar" data-id="${m.id}">Reservar Cita</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function mostrarCalendario(escortId, diaIndex = 0) {
+  const escort = DB.escorts.find(m => m.id === escortId);
+  const hoy = new Date();
+  const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
+  const dias = [];
+  for (let d = hoy.getDate(); d <= finMes; d++) dias.push(new Date(hoy.getFullYear(), hoy.getMonth(), d));
+  
+  const slots = [];
+  const fechaSeleccionada = dias[diaIndex];
+  for (let h = 10; h < 22; h += 2) {
+    let f = new Date(fechaSeleccionada.getFullYear(), fechaSeleccionada.getMonth(), fechaSeleccionada.getDate(), h, 0, 0, 0);
+    const iso = f.toISOString().slice(0, 16);
+    if (f > hoy && !escort.ocupadas.includes(iso)) slots.push(iso);
+  }
+
+  app.innerHTML = `
+    <div class="contenedor">
+      <div class="tarjeta">
+        <h2 class="titulo">${escort.nombre}</h2>
+        <select class="btn-gold" id="select-dia" data-id="${escortId}">
+          ${dias.map((d, i) => `<option value="${i}" ${i == diaIndex ? 'selected' : ''}>${d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric' })}</option>`).join('')}
+        </select>
+        <div class="grid-slots">
+          ${slots.length > 0 ? slots.map(s => `<div class="slot btn-slot" data-id="${escortId}" data-fecha="${s}">${s.split('T')[1]}</div>`).join('') : '<p>No hay disponibilidad</p>'}
+        </div>
+        <button class="btn-gold btn-volver">Volver</button>
+      </div>
+    </div>
+  `;
+}
+
+// --- DELEGACIÓN DE EVENTOS (Aquí reside la magia) ---
+
+app.addEventListener('click', (e) => {
+  // Botón Volver
+  if (e.target.classList.contains('btn-volver')) mostrarCatalogo();
+  
+  // Botón Reservar
+  if (e.target.classList.contains('btn-reservar')) mostrarCalendario(e.target.dataset.id);
+
+  // Botón Slot (Hora)
+  if (e.target.classList.contains('btn-slot')) {
+    const { id, fecha } = e.target.dataset;
+    app.innerHTML = `
+      <div class="contenedor">
+        <div class="tarjeta">
+          <h2 class="titulo">Confirmar Reserva</h2>
+          <p>Cita: ${fecha.replace('T', ' a las ')}</p>
+          <div class="grupo-input"><input type="text" id="nombreCliente" placeholder="Nombre del cliente" required /></div>
+          <button class="btn-gold" id="btn-finalizar" data-id="${id}" data-fecha="${fecha}">Confirmar</button>
+          <button class="btn-gold btn-volver">Cancelar</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // Botón Confirmar Final
+  if (e.target.id === 'btn-finalizar') {
+    const nombre = document.getElementById('nombreCliente').value;
+    if (!nombre) return alert("Introduce tu nombre");
+    const { id, fecha } = e.target.dataset;
+    DB.escorts.find(m => m.id === id).ocupadas.push(fecha);
+    alert(`Cita confirmada para ${nombre}.`);
+    mostrarCatalogo();
+  }
+});
+
+// Evento cambio select
+app.addEventListener('change', (e) => {
+  if (e.target.id === 'select-dia') mostrarCalendario(e.target.dataset.id, e.target.value);
+});
+
+// Listener Login
+app.addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (document.getElementById('username')?.value === 'admin' && document.getElementById('password')?.value === '123') mostrarCatalogo();
+});
+
+mostrarLogin();

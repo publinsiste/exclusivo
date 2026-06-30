@@ -1,0 +1,81 @@
+:root { 
+  --bg-dark: #0a0a0a; 
+  --gold: #c5a059; 
+  --text-soft: #e0e0e0; 
+}
+
+body { 
+  background-color: var(--bg-dark); 
+  color: var(--text-soft); 
+  font-family: 'Segoe UI', sans-serif; 
+  margin: 0; 
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#app { width: 100%; }
+
+.contenedor { width: 100%; max-width: 500px; padding: 2rem; margin: auto; }
+
+.tarjeta { 
+  background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%); 
+  border: 1px solid var(--gold); 
+  padding: 2rem; 
+  text-align: center; 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.titulo { color: var(--gold); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px; }
+
+.btn-gold { 
+  width: 100%; padding: 0.8rem; background: transparent; 
+  color: var(--gold); border: 1px solid var(--gold); 
+  cursor: pointer; text-transform: uppercase; 
+  letter-spacing: 2px; margin-top: 10px; transition: 0.3s; 
+}
+.btn-gold:hover { background: var(--gold); color: #000; }
+
+.ficha-modelo { 
+  border: 1px solid #333; background: #121212; padding: 2rem; text-align: center; 
+}
+/* Forzar el estilo de los inputs para eliminar el blanco de Vite */
+.grupo-input input {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: 1px solid #333 !important;
+  padding: 0.8rem !important;
+  border-radius: 0 !important; /* Por si Vite les pone bordes redondeados */
+  outline: none !important;
+}
+
+/* Opcional: Que cambie el borde al hacer click */
+.grupo-input input:focus {
+  border-color: var(--gold) !important;
+}
+/* Estilo para los botones de horas (slots) */
+.grid-slots { 
+  display: grid; 
+  grid-template-columns: repeat(3, 1fr); /* 3 columnas para que queden mejor */
+  gap: 10px; 
+  margin-top: 20px; 
+}
+
+.slot { 
+  border: 1px solid #333; 
+  background: #1a1a1a; 
+  padding: 12px 5px; 
+  text-align: center; 
+  cursor: pointer; 
+  font-size: 0.9rem; 
+  color: #888; 
+  transition: all 0.3s ease; 
+}
+
+.slot:hover { 
+  border-color: var(--gold); 
+  color: var(--gold); 
+  background: #222;
+  transform: translateY(-2px);
+}
