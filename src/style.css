@@ -166,3 +166,14 @@ body {
   .grid-slots { grid-template-columns: repeat(3, 1fr); }
   body { display: flex; justify-content: center; align-items: center; }
 }
+/* Esto evita el zoom automático en los inputs al hacer clic en ellos */
+input, textarea, select {
+  font-size: 16px !important;
+}
+
+/* Opcional: Esto ayuda a que el contenedor principal no se desborde */
+body, html {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
