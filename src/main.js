@@ -8,10 +8,17 @@ const app = document.querySelector('#app');
 async function cargarDatos() {
   try {
     const respuesta = await fetch('/api/obtener-escorts.php');
-    if (!respuesta.ok) throw new Error("No se pudo conectar con la BD");
+    
+    // Si el servidor responde con un error HTTP (ej. 500), lo capturamos
+    if (!respuesta.ok) {
+        const errorText = await respuesta.text();
+        throw new Error(`Servidor respondió: ${respuesta.status} - ${errorText}`);
+    }
+    
     DB = await respuesta.json();
-    mostrarLogin(); // Una vez cargados los datos, mostramos el login
+    mostrarLogin();
   } catch (error) {
+    console.error("Detalle del error:", error); // <-- ESTO ES CLAVE
     app.innerHTML = `<div class="contenedor"><p>Error: ${error.message}</p></div>`;
   }
 }
