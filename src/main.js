@@ -1,13 +1,12 @@
 // main.js - Sistema de Gestión de Reservas
 import './style.css'; 
 
-const DB = {
-  escorts: [
-    { id: 'e1', nombre: 'Valeria', ocupadas: ['2026-06-30T18:00'] },
-    { id: 'e2', nombre: 'Sophia', ocupadas: [] },
-    { id: 'e3', nombre: 'Elena', ocupadas: [] }
-  ]
-};
+// En lugar de const DB = { ... }
+async function cargarEscorts() {
+  const respuesta = await fetch('/api/obtener-escorts.php');
+  const datos = await respuesta.json();
+  return datos;
+}
 
 const app = document.querySelector('#app');
 
