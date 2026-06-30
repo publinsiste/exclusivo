@@ -1,16 +1,19 @@
 <?php
 header('Content-Type: application/json');
 
-// Credenciales (Cámbialas por las reales de tu panel OVH)
-$host = 'mysql5-xxxx.hosting.ovh.net';
-$db   = 'nombre_de_tu_bbdd';
-$user = 'tu_usuario';
-$pass = 'tu_contraseña';
+// Tus credenciales de OVH Cloud
+$host = 'le624640-001.eu.clouddb.ovh.net';
+$port = '35925';
+$db   = 'Publinsiste'; // Asumiendo que el nombre de la BD coincide con el usuario
+$user = 'dsancram';
+$pass = '52xmaxABC';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
+    // Es vital añadir el puerto al DSN de PDO
+    $pdo = new PDO("mysql:host=$host;port=$port;dbname=$db;charset=utf8", $user, $pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Obtener escorts y sus reservas ocupadas
+    // Obtener escorts y sus reservas
     $stmt = $pdo->query("
         SELECT e.id, e.nombre, GROUP_CONCAT(r.fecha_reserva) as ocupadas 
         FROM escorts e 
@@ -30,6 +33,8 @@ try {
     echo json_encode(['escorts' => $escorts]);
     
 } catch (PDOException $e) {
+    // Si falla, devolvemos un JSON válido en lugar de texto plano
+    http_response_code(500);
     echo json_encode(['error' => 'Error de conexión: ' . $e->getMessage()]);
 }
 ?>
