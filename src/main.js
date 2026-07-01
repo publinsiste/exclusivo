@@ -6,7 +6,6 @@ const app = document.querySelector('#app');
 
 // --- INICIALIZACIÓN DEL MODAL Y EL VISOR ---
 function crearModal() {
-  // Modal principal
   const div = document.createElement('div');
   div.id = 'modal-perfil';
   div.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center;';
@@ -19,14 +18,11 @@ function crearModal() {
   document.body.appendChild(div);
   document.getElementById('cerrar-modal').onclick = () => div.style.display = 'none';
 
-  // Visor de zoom (Lightbox)
   const visor = document.createElement('div');
   visor.id = 'visor-zoom';
   visor.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:10000; justify-content:center; align-items:center; cursor:zoom-out;';
   visor.innerHTML = '<img id="img-zoom" style="max-width:90%; max-height:90%; border-radius:5px;">';
   document.body.appendChild(visor);
-  
-  // Cerrar zoom al clicar en cualquier parte
   visor.onclick = () => visor.style.display = 'none';
 }
 
@@ -41,7 +37,6 @@ window.abrirPerfil = async (id) => {
     const res = await fetch(`https://publinsiste.com/exclusivo/api/api.php?action=get_perfil&id=${id}`);
     const data = await res.json();
     
-    // Generamos las miniaturas con el evento onclick para abrir el zoom
     contenido.innerHTML = `
       <h2 class="titulo">${data.info.nombre}</h2>
       <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap:10px; margin-top:15px;">
@@ -67,14 +62,19 @@ async function cargarDatos() {
     if (!respuesta.ok) throw new Error(`Error: ${respuesta.status}`);
     DB = await respuesta.json();
     crearModal();
-    mostrarLogin();
+    
+    // Verificación de sesión persistente
+    if (localStorage.getItem('sesion_activa') === 'true') {
+        mostrarCatalogo();
+    } else {
+        mostrarLogin();
+    }
   } catch (error) {
     app.innerHTML = `<div class="contenedor"><p>Error: ${error.message}</p></div>`;
   }
 }
 
-// --- VISTAS (LOGIN, CATÁLOGO, CALENDARIO) ---
-// (Estas funciones permanecen igual que las tenías)
+// --- VISTAS ---
 function mostrarLogin() {
   app.innerHTML = `
     <div class="contenedor">
@@ -174,6 +174,7 @@ app.addEventListener('submit', (e) => {
   e.preventDefault();
   if (e.target.id === 'login-form') {
     if (document.getElementById('username')?.value === 'admin' && document.getElementById('password')?.value === '123') {
+      localStorage.setItem('sesion_activa', 'true');
       mostrarCatalogo();
     } else {
       alert("Credenciales incorrectas");
